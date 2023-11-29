@@ -4,51 +4,31 @@
   <meta charset="UTF-8">
   <title>Page Switcher</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      overflow-x: hidden;
-    }
-    .container {
-      width: 200%;
-      height: 100vh;
-      display: flex;
-    }
-    .page {
-      width: 50%;
-      height: 100%;
-      transition: transform 0.5s ease-in-out;
-    }
-    .page-1 {
-      background-color: #f0f0f0;
-    }
-    .page-2 {
-      background-color: #e0e0e0;
-      transform: translateX(100%);
-    }
+    /* ... Your CSS styles ... */
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="page page-1">
-      <!-- Content for updates.html -->
-      <h1>Updates Page</h1>
-      <p>This is the Updates page content.</p>
+    <div class="page page-1" id="page1">
+      <!-- Content from updates.html will be loaded here -->
     </div>
-    <div class="page page-2">
-      <!-- Content for chat.html -->
-      <h1>Chat Page</h1>
-      <p>This is the Chat page content.</p>
+    <div class="page page-2" id="page2">
+      <!-- Content from chat.html will be loaded here -->
     </div>
   </div>
 
   <script>
     let startX = 0;
     let endX = 0;
+    let currentPage = 1;
 
     document.querySelector('.container').addEventListener('touchstart', touchStart, false);
     document.querySelector('.container').addEventListener('touchend', touchEnd, false);
+
+    // Load updates.html by default when the page loads
+    window.onload = function() {
+      loadPageContent('updates.html', 'page1');
+    };
 
     function touchStart(event) {
       startX = event.touches[0].clientX;
@@ -60,15 +40,26 @@
     }
 
     function handleGesture() {
-      if (startX - endX > 50) {
-        // Swiped left, go to next page
-        document.querySelector('.page-1').style.transform = 'translateX(-100%)';
-        document.querySelector('.page-2').style.transform = 'translateX(0)';
-      } else if (endX - startX > 50) {
-        // Swiped right, go to previous page
-        document.querySelector('.page-1').style.transform = 'translateX(0)';
-        document.querySelector('.page-2').style.transform = 'translateX(100%)';
+      if (startX - endX > 50 && currentPage === 1) {
+        // Swiped left, load chat.html
+        currentPage = 2;
+        document.getElementById('page2').style.transform = 'translateX(0)';
+        loadPageContent('chat.html', 'page2');
+      } else if (endX - startX > 50 && currentPage === 2) {
+        // Swiped right, load updates.html
+        currentPage = 1;
+        document.getElementById('page1').style.transform = 'translateX(0)';
+        loadPageContent('updates.html', 'page1');
       }
+    }
+
+    function loadPageContent(pageURL, containerId) {
+      fetch(pageURL)
+        .then(response => response.text())
+        .then(content => {
+          document.getElementById(containerId).innerHTML = content;
+        })
+        .catch(error => console.log(error));
     }
   </script>
 </body>
